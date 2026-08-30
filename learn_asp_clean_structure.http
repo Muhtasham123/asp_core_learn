@@ -1,0 +1,6 @@
+@learn_asp_clean_structure_HostAddress = http://localhost:5224
+
+GET {{learn_asp_clean_structure_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
