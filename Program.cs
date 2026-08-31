@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore; 
 using learn_asp_clean_structure.Services;
 using learn_asp_clean_structure.Data;
+using learn_asp_clean_structure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ExceptionHandelingMiddleware>();
 app.MapControllers();
 
 app.Run();
