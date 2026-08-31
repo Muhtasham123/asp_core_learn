@@ -1,100 +1,69 @@
+namespace learn_asp_clean_structure.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
-using learn_asp_clean_structure.Models;
 using learn_asp_clean_structure.DTOs;
+using learn_asp_clean_structure.Services;
 
 [ApiController]
 [Route("api/[controller]")]
 
 public class UserController : ControllerBase
 {
-    private static List<User> _users = new List<User>();
-    private static int _nextId = 0;
+    private readonly IUserService _userService;
+    public UserController(IUserService userService)
+    {
+        _userService = userService;
+    }
 
     [HttpGet]
     public ActionResult<List<UserResponse>> GetAll()
     {
-        var users = _users.Select(u => MapResponse(u));
+        var users = _userService.GetAll();
         return Ok(users);
     }
 
     [HttpGet("{id}")]
     public ActionResult<UserResponse> GetById(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = _userService.GetById(id);
         if (user == null)
         {
             return NotFound(new {Message = "User does not exist"});
         }
 
-        var responseUser = MapResponse(user);
-        return Ok(responseUser);
+        return Ok(user);
     }
 
     [HttpPost]
-    public ActionResult<UserResponse> CreateUser(UserCreateRequest user)
+    public ActionResult<UserResponse> Create(UserCreateRequest user)
     {
-        var userModelObject = new User
-        {
-          Id = ++_nextId,
-          Name = user.Name,
-          Email = user.Email,
-          PasswordHash = HashPassword(user.Password),
-          Age = user.Age  
-        };
-
-        _users.Add(userModelObject);
-        return CreatedAtAction(nameof(GetById), new {id = userModelObject.Id}, MapResponse(userModelObject));
+        
+        var responseUser = _userService.Create(user);
+        return CreatedAtAction(nameof(GetById), new {id = responseUser.Id}, responseUser);
     }
 
     [HttpPut("{id}")]
-    public ActionResult<UserResponse> UpdateUser(int id, UserUpdateRequest updatedUser)
+    public ActionResult<UserResponse> Update(int id, UserUpdateRequest updatedUser)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = _userService.Update(id, updatedUser);
 
         if (user == null)
         {
             return NotFound(new {Message = "User does not exist"});
         }
 
-        user.Name = updatedUser.Name;
-        user.Email = updatedUser.Email;
-        user.Age = updatedUser.Age;
-
-        return Ok(MapResponse(user));
+        return Ok(user);
     }
 
     [HttpDelete("{id}")]
-    public ActionResult DeleteUser(int id)
+    public ActionResult Delete(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var isDeleted = _userService.Delete(id);
 
-        if (user == null)
+        if (!isDeleted)
         {
             return NotFound(new { Message = "User does not exist" });
         }
-
-        _users.Remove(user);
         return NoContent();
-    }
-
-    private UserResponse MapResponse(User user)
-    {
-        UserResponse userResponse = new UserResponse
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            Age = user.Age,
-            CreatedAt = user.CreatedAt
-        };
-
-        return userResponse;
-    }
-
-    private string HashPassword(string password)
-    {
-        return Convert.ToBase64String(
-            System.Text.Encoding.UTF8.GetBytes(password)
-        );
     }
 }

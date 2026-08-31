@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("learn_asp_clean_structure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9c2c6c578aff5b4fa395241bb1f31400eb9bcda1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9c93620ace5814d526d9d6f6201415b62f90be09")]
 [assembly: System.Reflection.AssemblyProductAttribute("learn_asp_clean_structure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("learn_asp_clean_structure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
