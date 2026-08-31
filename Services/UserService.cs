@@ -2,21 +2,29 @@ namespace learn_asp_clean_structure.Services;
 
 using learn_asp_clean_structure.Models;
 using learn_asp_clean_structure.DTOs;
+using learn_asp_clean_structure.Data;
+using Microsoft.EntityFrameworkCore;
 
 public class UserService : IUserService
 {
-    private static List<User> _users = new List<User>();
-    private static int _nextId = 0;
+    
+    private readonly AppDbContext _context;
 
-    public List<UserResponse> GetAll()
+    public UserService(AppDbContext context)
     {
-        var users = _users.Select(u => MapResponse(u)).ToList();
-        return users;
+        _context = context;
     }
 
-    public UserResponse? GetById(int id)
+    public async Task<List<UserResponse>> GetAll()
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var users = await _context.Users.ToListAsync();
+
+        return users.Select(u => MapResponse(u)).ToList();
+    }
+
+    public async Task<UserResponse?> GetById(int id)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (user == null)
         {
             return null;
@@ -26,24 +34,24 @@ public class UserService : IUserService
         return responseUser;
     }
 
-    public UserResponse Create(UserCreateRequest user)
+    public async Task<UserResponse> Create(UserCreateRequest user)
     {
         var userModelObject = new User
         {
-            Id = ++_nextId,
             Name = user.Name,
             Email = user.Email,
             PasswordHash = HashPassword(user.Password),
             Age = user.Age
         };
 
-        _users.Add(userModelObject);
+        _context.Users.Add(userModelObject);
+        await _context.SaveChangesAsync();
         return  MapResponse(userModelObject);
     }
 
-    public UserResponse? Update(int id, UserUpdateRequest updatedUser)
+    public async Task<UserResponse?> Update(int id, UserUpdateRequest updatedUser)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null)
         {
@@ -54,19 +62,21 @@ public class UserService : IUserService
         user.Email = updatedUser.Email;
         user.Age = updatedUser.Age;
 
+        await _context.SaveChangesAsync();
         return MapResponse(user);
     }
 
-    public bool Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
         if (user == null)
         {
             return false;
         }
 
-        _users.Remove(user);
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
         return true;
     }
 

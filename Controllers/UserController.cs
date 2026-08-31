@@ -16,16 +16,16 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<UserResponse>> GetAll()
+    public async Task<ActionResult<List<UserResponse>>> GetAll()
     {
-        var users = _userService.GetAll();
+        var users = await _userService.GetAll();
         return Ok(users);
     }
 
     [HttpGet("{id}")]
-    public ActionResult<UserResponse> GetById(int id)
+    public async Task<ActionResult<UserResponse>> GetById(int id)
     {
-        var user = _userService.GetById(id);
+        var user = await _userService.GetById(id);
         if (user == null)
         {
             return NotFound(new {Message = "User does not exist"});
@@ -35,17 +35,17 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<UserResponse> Create(UserCreateRequest user)
+    public async Task<ActionResult<UserResponse>> Create(UserCreateRequest user)
     {
         
-        var responseUser = _userService.Create(user);
+        var responseUser = await _userService.Create(user);
         return CreatedAtAction(nameof(GetById), new {id = responseUser.Id}, responseUser);
     }
 
     [HttpPut("{id}")]
-    public ActionResult<UserResponse> Update(int id, UserUpdateRequest updatedUser)
+    public async Task<ActionResult<UserResponse>> Update(int id, UserUpdateRequest updatedUser)
     {
-        var user = _userService.Update(id, updatedUser);
+        var user = await _userService.Update(id, updatedUser);
 
         if (user == null)
         {
@@ -56,9 +56,9 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id)
+    public async Task<ActionResult> Delete(int id)
     {
-        var isDeleted = _userService.Delete(id);
+        var isDeleted = await _userService.Delete(id);
 
         if (!isDeleted)
         {
