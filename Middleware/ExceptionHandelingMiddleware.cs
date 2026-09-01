@@ -36,7 +36,6 @@ public class ExceptionHandelingMiddleware
         {
             StatusCode = context.Response.StatusCode,
             Message = "Internal server error",
-            Detail = ex.Message
         };
 
         var json = JsonSerializer.Serialize(response);

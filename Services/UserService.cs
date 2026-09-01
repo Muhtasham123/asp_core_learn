@@ -4,6 +4,7 @@ using learn_asp_clean_structure.Models;
 using learn_asp_clean_structure.DTOs;
 using learn_asp_clean_structure.Data;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 public class UserService : IUserService
 {
@@ -13,13 +14,6 @@ public class UserService : IUserService
     public UserService(AppDbContext context)
     {
         _context = context;
-    }
-
-    public async Task<List<UserResponse>> GetAll()
-    {
-        var users = await _context.Users.ToListAsync();
-
-        return users.Select(u => MapResponse(u)).ToList();
     }
 
     public async Task<UserResponse?> GetById(int id)
@@ -40,7 +34,7 @@ public class UserService : IUserService
         {
             Name = user.Name,
             Email = user.Email,
-            PasswordHash = HashPassword(user.Password),
+            PasswordHash = BCrypt.HashPassword(user.Password),
             Age = user.Age
         };
 
@@ -92,12 +86,5 @@ public class UserService : IUserService
         };
 
         return userResponse;
-    }
-
-    private string HashPassword(string password)
-    {
-        return Convert.ToBase64String(
-            System.Text.Encoding.UTF8.GetBytes(password)
-        );
     }
 }

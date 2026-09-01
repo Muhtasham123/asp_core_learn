@@ -4,7 +4,6 @@ using learn_asp_clean_structure.DTOs;
 
 public interface IUserService
 {
-    public Task<List<UserResponse>> GetAll();
     public Task<UserResponse?> GetById(int id);
     public Task<UserResponse> Create(UserCreateRequest user);
     public Task<UserResponse?> Update(int id, UserUpdateRequest updateUser);
