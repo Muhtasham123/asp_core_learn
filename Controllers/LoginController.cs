@@ -1,11 +1,13 @@
 using learn_asp_clean_structure.DTOs;
 using learn_asp_clean_structure.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace learn_asp_clean_structure.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
+[EnableRateLimiting("auth")]
 
 public class LoginController : ControllerBase
 {

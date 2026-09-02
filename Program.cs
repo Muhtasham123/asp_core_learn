@@ -6,6 +6,7 @@ using learn_asp_clean_structure.Services;
 using learn_asp_clean_structure.Data;
 using learn_asp_clean_structure.Middleware;
 using DotNetEnv;
+using System.Threading.RateLimiting;
 
 Env.Load();
 
@@ -35,6 +36,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext => RateLimitPartition.GetSlidingWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+
+        factory: _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = 100,
+            Window = TimeSpan.FromMinutes(1),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        }
+    ));
+
+    options.AddPolicy("auth", httpContext => RateLimitPartition.GetSlidingWindowLimiter(
+    
+        partitionKey:httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+
+        factory: _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            SegmentsPerWindow = 6,
+            QueueLimit = 0
+        }
+    ));
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsync(
+            "{\"Message\":\"Too many requests. Please try again later.\"}",
+            cancellationToken);
+    };
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenProviderService, TokenProviderService>();
@@ -44,6 +84,7 @@ var app = builder.Build();
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ExceptionHandelingMiddleware>();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -6,6 +6,7 @@ using learn_asp_clean_structure.DTOs;
 using learn_asp_clean_structure.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -44,6 +45,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting("auth")]
     public async Task<ActionResult<UserResponse>> Create(UserCreateRequest user)
     {
         
